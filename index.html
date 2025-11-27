@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<title>h ī l ī t</title>
+
+<style>
+* {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    color: black;
+    background: transparent;
+    font: 1rem monospace;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+
+#markers {
+    padding: 0.25rem;
+    min-width: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    resize: horizontal;
+    overflow: auto;
+}
+
+search {
+    display: flex;
+}
+
+input, label, pre, textarea {
+    margin: 0.125rem;
+    padding: 0.125rem;
+}
+
+input[type=checkbox] {
+}
+
+input[type=text] {
+    flex: 1;
+    background: #e5e5e5;
+}
+
+label {
+    flex: 1;
+    color: blue;
+}
+
+#summary {
+    border-left: 1px solid lightgrey;
+    border-right: 1px solid lightgrey;
+}
+    
+#display {
+    flex: 1;
+    min-width: 5rem;
+    overflow: auto;
+    display: grid;
+}
+
+pre, textarea {
+    grid-area: 1 / 1 / 1 / 1;
+    overflow: clip;
+    text-wrap: wrap;
+}
+
+pre {
+    color: transparent;
+}
+
+textarea {
+    resize: none;
+}
+
+#M1_txt, #M1_pre > mark { background: #FAC0CB; }
+#M2_txt, #M2_pre > mark { background: #A3FB94; }
+#M3_txt, #M3_pre > mark { background: #DAB884; }
+#M4_txt, #M4_pre > mark { background: #B6EEEE; }
+#M5_txt, #M5_pre > mark { background: #D9A0DF; }
+#M6_txt, #M6_pre > mark { background: #B5B356; }
+#M7_txt, #M7_pre > mark { background: #F8AD00; }
+#M8_txt, #M8_pre > mark { background: #91CEFC; }
+#M9_txt, #M9_pre > mark { background: #F66FB8; }
+#M10_txt, #M10_pre > mark { background: #3FC955; }
+#M11_txt, #M11_pre > mark { background: #E6895F; }
+#M12_txt, #M12_pre > mark { background: #69E0E1; }
+#M13_txt, #M13_pre > mark { background: #BA99FF; }
+#M14_txt, #M14_pre > mark { background: #4ADDDE; }
+#M15_txt, #M15_pre > mark { background: #F67675; }
+
+mark { border-radius: 0.25rem; }
+
+.error { background: red; }
+.independent { background: yellow; }
+.pseudoindependent { background: lightblue; }
+.dependent { background: lightgrey; }
+.ignore { color:black; text-decoration: line-through;; /*background: grey; border-radius: 0; */}
+.append { background: #ad4; }
+</style>
+
+<div id=markers>
+
+<details open>
+<summary>hīlīters</summary>
+<search><input type=checkbox id='M1_chk'><input type=text id='M1_txt'></search>
+<search><input type=checkbox id='M2_chk'><input type=text id='M2_txt'></search>
+<search><input type=checkbox id='M3_chk'><input type=text id='M3_txt'></search>
+<search><input type=checkbox id='M4_chk'><input type=text id='M4_txt'></search>
+<search><input type=checkbox id='M5_chk'><input type=text id='M5_txt'></search>
+<search><input type=checkbox id='M6_chk'><input type=text id='M6_txt'></search>
+<search><input type=checkbox id='M7_chk'><input type=text id='M7_txt'></search>
+<search><input type=checkbox id='M8_chk'><input type=text id='M8_txt'></search>
+<search><input type=checkbox id='M9_chk'><input type=text id='M9_txt'></search>
+<search><input type=checkbox id='M10_chk'><input type=text id='M10_txt'></search>
+<search><input type=checkbox id='M11_chk'><input type=text id='M11_txt'></search>
+<search><input type=checkbox id='M12_chk'><input type=text id='M12_txt'></search>
+<search><input type=checkbox id='M13_chk'><input type=text id='M13_txt'></search>
+<search><input type=checkbox id='M14_chk'><input type=text id='M14_txt'></search>
+<search><input type=checkbox id='M15_chk'><input type=text id='M15_txt'></search>
+</details>
+
+<details open>
+<summary>tools</summary>
+<search><label><input type="checkbox" id="claims_chk">claims</label></search>
+<search><label><input type="checkbox" id="AUstamp_chk">AU stamps</label></search>
+<search><label><input type="checkbox" id="WOstamp_chk">WO stamps</label></search>
+</details>
+
+</div>
+
+<div id=summary></div>
+
+<div id=display>
+<pre id='M1_pre'></pre>
+<pre id='M2_pre'></pre>
+<pre id='M3_pre'></pre>
+<pre id='M4_pre'></pre>
+<pre id='M5_pre'></pre>
+<pre id='M6_pre'></pre>
+<pre id='M7_pre'></pre>
+<pre id='M8_pre'></pre>
+<pre id='M9_pre'></pre>
+<pre id='M10_pre'></pre>
+<pre id='M11_pre'></pre>
+<pre id='M12_pre'></pre>
+<pre id='M13_pre'></pre>
+<pre id='M14_pre'></pre>
+<pre id='M15_pre'></pre>
+
+<pre id="claims_pre"></pre>
+<pre id="AUstamp_pre"></pre>
+<pre id="WOstamp_pre"></pre>
+
+<textarea id=source></textarea>
+</div>
+
+<script>
+"use strict";
+
+function AbS_to_regex(string) {
+    const s =string.replaceAll(" ", "")
+    .replaceAll(/\[(,?)(.*?)(,?)\]/gsu, (all, a, b, c) => "(" + b + ")" + (a !== "" || c !== "" ? "?" : ""))
+    .replaceAll(/([\dA-Z]+-[\dA-Z]+)/gisu, (all, a) => "[" + a + "]")
+    .replaceAll("_", "[- ]?")
+    .replaceAll("+", "[A-Z]*")
+    .replaceAll(",", "|");
+
+    return new RegExp("\\b(" + s + ")\\b", "gisu");
+}
+
+function update(chk, txt, pre) {
+    const string = document.getElementById("source").value;
+
+    if (!chk.checked || txt === "") {
+        pre.innerHTML = source + "\n";
+        return;
+    }
+
+    const regex = AbS_to_regex(txt.value);
+    pre.innerHTML = string.replaceAll(regex, "<mark>$1</mark>") + "\n";
+}
+
+document.getElementById("source").addEventListener("input", () => {
+    for (let i = 1; i <= 15; i += 1) {
+        const chk = document.getElementById("M" + i + "_chk");
+        const txt = document.getElementById("M" + i + "_txt");
+        const pre = document.getElementById("M" + i + "_pre");
+        update(chk, txt, pre);
+    }
+
+    update_claims();
+    update_AU_stamp();
+    update_WO_stamp();
+});
+
+
+for (let i = 1; i <= 15; i += 1) {
+    const chk = document.getElementById("M" + i + "_chk");
+    const txt = document.getElementById("M" + i + "_txt");
+    const pre = document.getElementById("M" + i + "_pre");
+
+    chk.addEventListener("change", () => update(chk, txt, pre));
+    txt.addEventListener("change", () => {
+        chk.checked = txt.value !== "";
+        update(chk, txt, pre)
+    });
+}
+
+
+
+
+
+//----------stamps
+
+document.getElementById("AUstamp_chk").addEventListener("change", update_AU_stamp);
+
+function update_AU_stamp() {
+    const src = document.getElementById("source").value;
+
+    if (document.getElementById("AUstamp_chk").checked === false) {
+        document.getElementById("AUstamp_pre").innerHTML = src;
+        return;
+    }
+
+    const markup = AU_stamp(src); 
+    document.getElementById("AUstamp_pre").innerHTML = markup;
+}
+
+function AU_stamp(string) {
+    const regex = /^\d{10} \d{2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$/gm;
+    return string.replaceAll(regex, match => `<del>${match}</del>`);
+}
+
+
+
+document.getElementById("WOstamp_chk").addEventListener("change", update_WO_stamp);
+
+function update_WO_stamp() {
+    const src = document.getElementById("source").value;
+
+    if (document.getElementById("WOstamp_chk").checked === false) {
+        document.getElementById("WOstamp_pre").innerHTML = src;
+        return;
+    }
+
+    const markup = WO_stamp(src); 
+    document.getElementById("WOstamp_pre").innerHTML = markup;
+}
+
+
+function WO_stamp(string) {
+    const regex = /^WO \d{4}\/\d{6} PCT\/[A-Z]{2}\d{4}\/\d{6}$/gm;
+    return string.replaceAll(regex, match => `<del>${match}</del>`);
+}
+
+
+
+//----------------claimgame--------
+const claims_chk = document.getElementById("claims_chk");
+const claims_pre = document.getElementById("claims_pre");
+const plaintext = document.getElementById("source");
+
+claims_chk.addEventListener("change", update_claims);
+plaintext.addEventListener("input", update_claims);
+
+
+function update_claims() {
+    claims_pre.innerHTML = plaintext.value + "\n";
+
+    if (claims_chk.checked) {
+	const m = markup_claims(plaintext.value);
+        claims_pre.innerHTML = m + "\n";
+    }
+}
+
+
+
+function markup_claims(string) {
+    const regex = /^([\t \d]*?)(\d+)\.([\t ]*)(([a-z]+).*?\.)([\t ]*)$/gimsu;
+    let last_claim_number = 0;
+
+    function replacer(match, m1, number, m3, body, first, m6) {
+        const curr_claim_number = Number(number);
+        const type =
+            curr_claim_number !== last_claim_number + 1 ? "error" :
+            /claim/i.test(body) === false ? "independent" :
+            /the/i.test(first) === false ? "pseudoindependent" :
+            "dependent";
+
+	    body = markup_body(curr_claim_number, body);
+        last_claim_number = curr_claim_number;
+
+        return `${m1}<mark class=${type} id=claim${number}>${number}.</mark>${m3}${body}${m6}`;
+
+
+    }
+
+
+
+    const str = string.replaceAll(regex, replacer);
+
+    return str;
+}
+
+
+
+function markup_body(curr_claim_number, body) {
+	const regex = /claim(ed|s)?(?:(?:[-\r\n\t /,]|to|and|or)*\d+)*/gisu
+
+	function replacer(all) {
+		const nums = [...all.matchAll(/\d+/g)];
+
+		if (nums.some(e => Number(e) >= Number(curr_claim_number) )) {
+			return "<mark class=error>" + all + "</mark>"			;
+		}
+
+		return "<mark class=append>" + all + "</mark>";
+	}
+
+	return body.replaceAll(regex, replacer);
+}
+
+
+
+ </script>
