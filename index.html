@@ -70,6 +70,15 @@ pre {
     color: transparent;
 }
 
+#claimSummary{
+display:flex;
+flex-direction:column;
+}
+a {
+    margin: 0.125rem;
+    border-radius: 0.25rem;
+}
+
 textarea {
     resize: none;
 }
@@ -133,7 +142,9 @@ label { background: #e5e5e5; font-style: italic; color: black; }
 
 </div>
 
-<div id=summary></div>
+<div id=summary>
+<div id=claimSummary></div>
+</div>
 
 <div id=display>
 <pre id='M1_pre'></pre>
@@ -297,9 +308,14 @@ plaintext.addEventListener("input", update_claims);
 function update_claims() {
     claims_pre.innerHTML = plaintext.value + "\n";
 
+document.getElementById("claimSummary").innerHTML = "";
+
     if (claims_chk.checked) {
-	const m = markup_claims(plaintext.value);
+        const j = markup_claims(plaintext.value);
+        const m = j.markup;
         claims_pre.innerHTML = m + "\n";
+
+document.getElementById("claimSummary").innerHTML = j.summary.join("");
     }
 }
 
@@ -308,6 +324,7 @@ function update_claims() {
 function markup_claims(string) {
     const regex = /^([\t \d]*?)(\d+)\.([\t ]*)(([a-z]+).*?\.)([\t ]*)$/gimsu;
     let last_claim_number = 0;
+    let summary = [];
 
     function replacer(match, m1, number, m3, body, first, m6) {
         const curr_claim_number = Number(number);
@@ -317,6 +334,9 @@ function markup_claims(string) {
             /the/i.test(first) === false ? "pseudoindependent" :
             "dependent";
 
+        if (type !== "dependent") {
+        summary.push(`<a href=#claim${number} class=${type}>${number}.</a>`);
+}
 	    body = markup_body(curr_claim_number, body);
         last_claim_number = curr_claim_number;
 
@@ -327,15 +347,15 @@ function markup_claims(string) {
 
 
 
-    const str = string.replaceAll(regex, replacer);
+    const markup = string.replaceAll(regex, replacer);
 
-    return str;
+    return {markup,summary};
 }
 
 
 
 function markup_body(curr_claim_number, body) {
-	const regex = /claim(ed|s)?(?:(?:[-\r\n\t /,]|to|and|or)*\d+)*/gisu
+	const regex = /claims?(?:(?:[-\r\n\t /,]|to|and|or)*\d+)*/gisu
 
 	function replacer(all) {
 		const nums = [...all.matchAll(/\d+/g)];
