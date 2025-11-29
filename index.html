@@ -98,12 +98,17 @@ mark { border-radius: 0.25rem; }
 .dependent { background: lightgrey; }
 .ignore { color:black; text-decoration: line-through;; /*background: grey; border-radius: 0; */}
 .append { background: #ad4; }
+
+
+#title_txt { text-align: center; margin-bottom: 0.25rem; padding-bottom: 0.25rem; border-bottom: 1px solid lightgrey; }
+label { background: #e5e5e5; font-style: italic; color: black; }
+
 </style>
 
 <div id=markers>
 
-<details open>
-<summary>hīlīters</summary>
+<input id=title_txt>
+
 <search><input type=checkbox id='M1_chk'><input type=text id='M1_txt'></search>
 <search><input type=checkbox id='M2_chk'><input type=text id='M2_txt'></search>
 <search><input type=checkbox id='M3_chk'><input type=text id='M3_txt'></search>
@@ -119,14 +124,12 @@ mark { border-radius: 0.25rem; }
 <search><input type=checkbox id='M13_chk'><input type=text id='M13_txt'></search>
 <search><input type=checkbox id='M14_chk'><input type=text id='M14_txt'></search>
 <search><input type=checkbox id='M15_chk'><input type=text id='M15_txt'></search>
-</details>
 
-<details open>
-<summary>tools</summary>
-<search><label><input type="checkbox" id="claims_chk">claims</label></search>
-<search><label><input type="checkbox" id="AUstamp_chk">AU stamps</label></search>
-<search><label><input type="checkbox" id="WOstamp_chk">WO stamps</label></search>
-</details>
+
+<search><input type="checkbox" id="claims_chk"><label>claims</label></search>
+<search><input type="checkbox" id="AUstamp_chk"><label>AU&nbsp;stamps</label></search>
+<search><input type="checkbox" id="WOstamp_chk"><label>WO&nbsp;stamps</label></search>
+
 
 </div>
 
@@ -159,12 +162,30 @@ mark { border-radius: 0.25rem; }
 <script>
 "use strict";
 
+
+document.title = "hīlīt";
+document.getElementById("title_txt").value = "hīlīt";
+
+document.getElementById("title_txt").addEventListener(
+    "input",
+    () => {
+        const c = document.getElementById("title_txt");
+        const v = c.value;
+        if (v === "") {
+            document.title = "hīlīt";
+        } else {
+            document.title = v;
+        }
+    }
+);
+
+
 function AbS_to_regex(string) {
     const s =string.replaceAll(" ", "")
     .replaceAll(/\[(,?)(.*?)(,?)\]/gsu, (all, a, b, c) => "(" + b + ")" + (a !== "" || c !== "" ? "?" : ""))
     .replaceAll(/([\dA-Z]+-[\dA-Z]+)/gisu, (all, a) => "[" + a + "]")
     .replaceAll("_", "[- ]?")
-    .replaceAll("+", "[A-Z]*")
+    .replaceAll("+", "[A-Z0-9]*")
     .replaceAll(",", "|");
 
     return new RegExp("\\b(" + s + ")\\b", "gisu");
@@ -182,7 +203,10 @@ function update(chk, txt, pre) {
     pre.innerHTML = string.replaceAll(regex, "<mark>$1</mark>") + "\n";
 }
 
-document.getElementById("source").addEventListener("input", () => {
+
+
+
+function update_everything() {
     for (let i = 1; i <= 15; i += 1) {
         const chk = document.getElementById("M" + i + "_chk");
         const txt = document.getElementById("M" + i + "_txt");
@@ -193,7 +217,11 @@ document.getElementById("source").addEventListener("input", () => {
     update_claims();
     update_AU_stamp();
     update_WO_stamp();
-});
+};
+
+document.getElementById("source").addEventListener("input", update_everything);
+
+
 
 
 for (let i = 1; i <= 15; i += 1) {
@@ -323,5 +351,6 @@ function markup_body(curr_claim_number, body) {
 }
 
 
+update_everything();
 
  </script>
